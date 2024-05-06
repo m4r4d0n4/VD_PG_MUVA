@@ -18,7 +18,8 @@ for frame, fps in get_next_frame(VIDEO_PATH):
         foreground = remove_shadows(foreground)
 
     if REMOVE_NOISE:
-        foreground = clean_image(foreground, 2, 1)
+        foreground = clean_image(foreground)
 
-    cv2.imshow("asd", foreground)
+    # Display frame
+    cv2.imshow("MOG Background Subtraction", foreground)
     cv2.waitKey(int(fps))
