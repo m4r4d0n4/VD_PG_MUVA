@@ -1,4 +1,6 @@
 import cv2
+
+
 class KNNBackgroundSubtraction:
     """
     Class to handle KNN background subtraction on images.
