@@ -3,17 +3,16 @@ import numpy as np
 
 
 class ParticleFilterV2:
-    def __init__(self, num_particles, state_dim, motion_model, sensor_model, resample_threshold):
+    def __init__(self, num_particles, state_dim, motion_model):
         self.num_particles = num_particles
         self.state_dim = state_dim
         self.particles = np.random.uniform(-1, 1, (num_particles, state_dim))
         self.weights = np.ones(num_particles) / num_particles
         self.motion_model = motion_model
-        self.sensor_model = sensor_model
-        self.resample_threshold = resample_threshold
+        self.good_particles = np.array([])
 
-    def predict(self, velocity):
-        self.particles = self.motion_model(self.particles, velocity)
+    def predict(self):
+        self.particles = self.motion_model(self.particles)
 
     def update(self, fg_frame):
         h, w = fg_frame.shape[:2]
@@ -45,14 +44,14 @@ class ParticleFilterV2:
                 self.particles[i, 1] = np.random.uniform(0, 1)
                 self.weights[i] = 0
 
-    def estimate(self):
-        good_particles = self.particles[self.weights > 0.02]
+    def estimate(self, min_weight=0.01):
+        self.good_particles = self.particles[self.weights > min_weight]
 
-        if len(good_particles) > 0:
-            min_x = np.min(good_particles[:, 0])
-            max_x = np.max(good_particles[:, 0])
-            min_y = np.min(good_particles[:, 1])
-            max_y = np.max(good_particles[:, 1])
+        if len(self.good_particles) > 0:
+            min_x = np.min(self.good_particles[:, 0])
+            max_x = np.max(self.good_particles[:, 0])
+            min_y = np.min(self.good_particles[:, 1])
+            max_y = np.max(self.good_particles[:, 1])
 
             return min_x, min_y, max_x, max_y
 
@@ -65,11 +64,6 @@ def gaussian_sensor_model(particle, observation, sensor_noise_std=0.05):
     return likelihood
 
 
-def linear_motion_model(particles, velocity, noise_std=0.01):
-    noise = np.random.normal(0, noise_std, particles.shape)
-    return particles + velocity + noise
-
-
-def disperse_motion_model(particles, velocity, noise_std=0.008):
+def disperse_motion_model(particles, noise_std=0.008):
     noise = np.random.normal(0, noise_std, particles.shape)
     return particles + noise  # Ignore velocity

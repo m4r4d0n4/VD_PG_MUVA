@@ -11,7 +11,6 @@ class ParticleFilterWrapper:
         self.pf = particle_filter
         self.bg_subtractor = bg_subtractor
 
-        self.observed_pos = None, None
         self.estimated_pos = None, None
 
     def initialize(self):
@@ -31,16 +30,7 @@ class ParticleFilterWrapper:
         if x is None and y is None:
             return None, None
 
-        observation = np.array([x / w, y / h])
-
-        velocity = 0, 0
-
-        if self.observed_pos[0] is not None and observation[0] is not None:
-            velocity = np.array(observation) - np.array(self.observed_pos)
-            velocity = velocity / max(abs(velocity))
-            velocity /= 1000
-
-        self.pf.predict(velocity)
+        self.pf.predict()
         self.pf.update(fg)
         self.pf.resample()
 
@@ -53,26 +43,16 @@ class ParticleFilterWrapper:
 
             self.estimated_pos = min_x, min_y, max_x, max_y
 
-        self.observed_pos = x, y
-
-        # print(f"Observed: {int(self.estimated_pos[0] * w), int(self.estimated_pos[1] * h)}")
-        # print(f"Estimated: {self.observed_pos}")
-
         return self.estimated_pos
 
-    def draw(self, frame, draw_particles=True, draw_estimate=True, draw_observed=True):
+    def draw(self, frame, draw_particles=True, draw_estimate=True):
         h, w = frame.shape[:2]
 
         if draw_particles:
-            for i, particle in enumerate(self.pf.particles):
-                weight = int(self.pf.weights[i] * 50)
-
-                if weight != 0:
-                    cv2.circle(frame, (int(particle[0] * w), int(particle[1] * h)), weight, (255, 0, 255), -1)
+            for i, particle in enumerate(self.pf.good_particles):
+                size = int(self.pf.weights[i] * 20)
+                size = max(size, 2)
+                cv2.circle(frame, (int(particle[0] * w), int(particle[1] * h)), size, (255, 0, 255), -1)
 
         if draw_estimate and self.estimated_pos[0] is not None:
-            # cv2.circle(frame, (int(self.estimated_pos[0]), int(self.estimated_pos[1] * h)), 10, (255, 255, 0))
             cv2.rectangle(frame, self.estimated_pos[:2], self.estimated_pos[2:4], (255, 0, 0), 2)
-
-        if draw_observed and self.observed_pos[0] is not None:
-            cv2.circle(frame, (self.observed_pos[0], self.observed_pos[1]), 10, (0, 0, 255))
