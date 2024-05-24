@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 
+
 class LucasKanadeTracker:
     def __init__(self):
         # Parámetros para el detector de esquinas de ShiTomasi
@@ -26,9 +27,9 @@ class LucasKanadeTracker:
         # Convertir el primer cuadro a escala de grises
         self.old_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         
-        # Encontrar esquinas en el primer cuadro
+        # Encontrar esquinas en el primer frame
         self.p0 = cv2.goodFeaturesToTrack(self.old_gray, mask=None, **self.feature_params)
-        
+
         # Crear una máscara de imagen para dibujar (inicialmente negra)
         self.mask = np.zeros_like(frame)
 
@@ -37,18 +38,18 @@ class LucasKanadeTracker:
         if self.old_gray is None or self.p0 is None:
             raise ValueError("El tracker no está inicializado. Llama a 'initialize' con el primer cuadro.")
         
-        # Convertir el nuevo cuadro a escala de grises
+        # Convertir el nuevo frame a escala de grises
         frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         
         # Calcular el flujo óptico usando Lucas-Kanade
         p1, st, err = cv2.calcOpticalFlowPyrLK(self.old_gray, frame_gray, self.p0, None, **self.lk_params)
         
-        # Seleccionar puntos buenos
+        # Filtrar puntos buenos
         if p1 is not None:
             good_new = p1[st == 1]
             good_old = self.p0[st == 1]
         
-        # Dibuja las pistas
+        # Dibujar las trazas
         for i, (new, old) in enumerate(zip(good_new, good_old)):
             a, b = new.ravel()
             c, d = old.ravel()
@@ -59,35 +60,11 @@ class LucasKanadeTracker:
             self.mask = cv2.line(self.mask, (a, b), (c, d), self.color[i].tolist(), 2)
             frame = cv2.circle(frame, (a, b), 5, self.color[i].tolist(), -1)
         
-        # Actualizar el cuadro anterior y los puntos
+        # Actualizar el frame anterior y los puntos
         self.old_gray = frame_gray.copy()
         self.p0 = good_new.reshape(-1, 1, 2)
         
-        # Combinar el cuadro actual con la máscara
+        # Combinar el frame actual con la máscara
         img = cv2.add(frame, self.mask)
-        return img
 
-# Ejemplo de uso de la clase en una aplicación en tiempo real
-if __name__ == "__main__":
-    tracker = LucasKanadeTracker()
-    cap = cv2.VideoCapture("./resources/video/Walking.60457274.mp4")  # Usar la cámara en tiempo real
-    
-    ret, frame = cap.read()
-    if not ret:
-        print("No se pudo acceder a la cámara.")
-    else:
-        tracker.initialize(frame)
-        
-        while True:
-            ret, frame = cap.read()
-            if not ret:
-                break
-            
-            processed_frame = tracker.apply(frame)
-            cv2.imshow('frame', processed_frame)
-            
-            if cv2.waitKey(30) & 0xFF == ord('q'):
-                break
-    
-    cap.release()
-    cv2.destroyAllWindows()
+        return img
