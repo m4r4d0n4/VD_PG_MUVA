@@ -14,8 +14,10 @@ from src.utils.video import get_next_frame
 
 REMOVE_SHADOWS = True
 REMOVE_NOISE = True
+
 BG_MOG = False
 BG_KNN = True
+
 VIDEO_PATH = "../resources/video/Walking.54138969.mp4"
 
 if BG_MOG:
