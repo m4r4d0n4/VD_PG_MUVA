@@ -26,3 +26,8 @@ def clean_image(foreground: np.ndarray, kernel_size: int = 2, iterations: int = 
     dilated_mask = cv2.dilate(eroded_mask, np.ones((kernel_size, kernel_size), np.uint8), iterations=iterations)
 
     return cv2.bitwise_and(foreground, dilated_mask)
+
+
+def fill_contours(foreground: np.ndarray):
+    contours, _ = cv2.findContours(foreground, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    return cv2.drawContours(foreground, contours, -1, color=(255), thickness=cv2.FILLED)
