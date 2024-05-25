@@ -1,4 +1,3 @@
-import cv2
 import numpy as np
 
 
@@ -36,34 +35,21 @@ class ParticleFilterV2:
         self.weights /= np.sum(self.weights)
 
     def resample(self):
-        for i, weight in enumerate(self.weights):
-            x, y = self.particles[i]
+        # Resample the particles using the "Algoritmo de la ruleta"
+        indices = np.random.choice(np.arange(self.num_particles), size=self.num_particles, p=self.weights)
+        self.particles = self.particles[indices]
+        self.weights.fill(1.0 / self.num_particles)
 
-            if weight == 0 or not (0 < x < 1) or not (0 < y < 1):
-                self.particles[i, 0] = np.random.uniform(0, 1)
-                self.particles[i, 1] = np.random.uniform(0, 1)
-                self.weights[i] = 0
+    def estimate(self):
+        # Estimate the bounding box based on the min, max particles position
+        min_x = np.min(self.particles[:, 0])
+        max_x = np.max(self.particles[:, 0])
+        min_y = np.min(self.particles[:, 1])
+        max_y = np.max(self.particles[:, 1])
 
-    def estimate(self, min_weight=0.01):
-        self.good_particles = self.particles[self.weights > min_weight]
-
-        if len(self.good_particles) > 0:
-            min_x = np.min(self.good_particles[:, 0])
-            max_x = np.max(self.good_particles[:, 0])
-            min_y = np.min(self.good_particles[:, 1])
-            max_y = np.max(self.good_particles[:, 1])
-
-            return min_x, min_y, max_x, max_y
-
-        return None, None, None, None
+        return min_x, min_y, max_x, max_y
 
 
-def gaussian_sensor_model(particle, observation, sensor_noise_std=0.05):
-    error = np.linalg.norm(particle - observation)
-    likelihood = np.exp(-error**2 / (2 * sensor_noise_std**2)) / (sensor_noise_std * np.sqrt(2 * np.pi))
-    return likelihood
-
-
-def disperse_motion_model(particles, noise_std=0.008):
+def disperse_motion_model(particles, noise_std=0.08):
     noise = np.random.normal(0, noise_std, particles.shape)
     return particles + noise  # Ignore velocity
