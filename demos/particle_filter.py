@@ -9,11 +9,14 @@ VIDEO_PATH = "../resources/video/Walking.60457274.mp4"
 
 
 def main():
+    # Initialize ParticleFilter
     num_particles = 1000
-    pf = ParticleFilterV2(num_particles, 2, disperse_motion_model)
+    pf = ParticleFilterV2(num_particles, disperse_motion_model)
 
+    # Initialize background subtractor
     bg_subtraction = MogBackgroundSubtraction()
 
+    # Initialize the ParticleFilterWrapper
     pfw = ParticleFilterWrapper(bg_subtraction, pf)
 
     for frame, fps in get_next_frame(VIDEO_PATH):

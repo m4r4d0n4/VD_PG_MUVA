@@ -2,13 +2,11 @@ import numpy as np
 
 
 class ParticleFilterV2:
-    def __init__(self, num_particles, state_dim, motion_model):
+    def __init__(self, num_particles, motion_model):
         self.num_particles = num_particles
-        self.state_dim = state_dim
-        self.particles = np.random.uniform(-1, 1, (num_particles, state_dim))
+        self.particles = np.random.uniform(-1, 1, (num_particles, 2))
         self.weights = np.ones(num_particles) / num_particles
         self.motion_model = motion_model
-        self.good_particles = np.array([])
 
     def predict(self):
         self.particles = self.motion_model(self.particles)
@@ -20,7 +18,7 @@ class ParticleFilterV2:
         for i, particle in enumerate(self.particles):
             x, y = int(particle[0] * w), int(particle[1] * h)
 
-            if x >= 0 and y >= 0 and x < w and y < h:
+            if 0 <= x < w and 0 <= y < h:
                 # Extract a small patch around the particle
                 patch = fg_frame[
                     max(y - half_patch_size, 0): min(y + half_patch_size, h),
