@@ -23,7 +23,7 @@ kalman_wrapper = KalmanWrapper(pos_kalman, size_kalman)
 # Initialize Particle Filter
 num_particles = 1000
 pf = ParticleFilterV2(num_particles, disperse_motion_model)
-pfw = ParticleFilterWrapper(bg_subtractor, pf)
+pfw = ParticleFilterWrapper(pf)
 
 for frame, fps in get_next_frame(VIDEO_PATH):
     # Apply the background subtractor

@@ -3,7 +3,9 @@ import cv2
 from src.background_subtraction.mog import MogBackgroundSubtraction
 from src.techniques.particle_filter_v2 import ParticleFilterV2, disperse_motion_model
 from src.techniques.particle_filter_wrapper import ParticleFilterWrapper
+from src.utils.background_subtraction import clean_image, fill_contours, remove_shadows
 from src.utils.video import get_next_frame
+
 
 VIDEO_PATH = "../resources/video/Walking.60457274.mp4"
 
@@ -17,10 +19,19 @@ def main():
     bg_subtraction = MogBackgroundSubtraction()
 
     # Initialize the ParticleFilterWrapper
-    pfw = ParticleFilterWrapper(bg_subtraction, pf)
+    pfw = ParticleFilterWrapper(pf)
 
     for frame, fps in get_next_frame(VIDEO_PATH):
-        pfw.apply(frame)
+        # Apply the background subtractor
+        fg = bg_subtraction.apply(frame)
+
+        # Reduce noise
+        fg = clean_image(remove_shadows(fg))
+
+        # Fill empty contours to improve the result
+        fg = fill_contours(fg)
+
+        pfw.apply(fg)
 
         pfw.draw(frame, draw_particles=True, draw_estimate=True)
 
