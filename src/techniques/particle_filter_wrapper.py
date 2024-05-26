@@ -1,7 +1,7 @@
 import cv2
+import numpy as np
 
 from src.techniques.particle_filter_v2 import ParticleFilterV2
-from src.utils.background_subtraction import clean_image, remove_shadows
 
 
 class ParticleFilterWrapper:
@@ -14,20 +14,12 @@ class ParticleFilterWrapper:
     def initialize(self):
         pass
 
-    def apply(self, frame):
+    def apply(self, frame: np.ndarray):
         h, w = frame.shape[:2]
-
-        # Calculate foreground/background mask
-        fg = self.bg_subtractor.apply(frame)
-        fg = clean_image(remove_shadows(fg))
-
-        # Fill empty contours for a better result
-        contours, _ = cv2.findContours(fg, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-        fg = cv2.drawContours(fg, contours, -1, color=(255), thickness=cv2.FILLED)
 
         # Calculate particle steps
         self.pf.predict()
-        self.pf.update(fg)
+        self.pf.update(frame)
         self.pf.resample()
 
         # Retrieve estimate
