@@ -10,34 +10,42 @@ from src.utils.video import get_next_frame
 
 VIDEO_PATH = "../resources/video/Walking.54138969.mp4"
 
-pos_kalman = Kalman(1, 0, 0.9, 1)
-size_kalman = Kalman(1, 0, 0.5, 0.9)
 
-# Initialize background subtractor
-bg_subtractor = MogBackgroundSubtraction()
+def main():
+    pos_kalman = Kalman(1, 0, 0.9, 1)
+    size_kalman = Kalman(1, 0, 0.5, 0.9)
 
-kalman_wrapper = KalmanWrapper(pos_kalman, size_kalman)
+    # Initialize background subtractor
+    bg_subtractor = MogBackgroundSubtraction()
 
-for frame, fps in get_next_frame(VIDEO_PATH):
-    fg = bg_subtractor.apply(frame)
+    kalman_wrapper = KalmanWrapper(pos_kalman, size_kalman)
 
-    # Reduce noise
-    fg = clean_image(remove_shadows(fg))
+    for frame, fps in get_next_frame(VIDEO_PATH):
+        fg = bg_subtractor.apply(frame)
 
-    # Fill empty contours to improve the result
-    fg = fill_contours(fg)
+        # Reduce noise
+        fg = clean_image(remove_shadows(fg))
 
-    x, y, w, h = get_bounding_box_from_foreground(fg)
+        # Fill empty contours to improve the result
+        fg = fill_contours(fg)
 
-    # Skip invalid frames
-    if x is None:
-        continue
+        x, y, w, h = get_bounding_box_from_foreground(fg)
 
-    min_x, min_y, max_x, max_y = kalman_wrapper.apply(fg)
+        # Skip invalid frames
+        if x is None:
+            continue
 
-    # Draw the bounding boxes
-    cv2.rectangle(frame, (min_x, min_y), (max_x, max_y), (255, 255, 0), 3)
-    cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+        min_x, min_y, max_x, max_y = kalman_wrapper.apply(fg)
 
-    cv2.imshow("Kalman", frame)
-    cv2.waitKey(0)
+        # Draw the bounding boxes
+        cv2.rectangle(frame, (min_x, min_y), (max_x, max_y), (255, 255, 0), 3)
+        cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+
+        cv2.imshow("Kalman", frame)
+        cv2.waitKey(0)
+
+    cv2.destroyAllWindows()
+
+
+if __name__ == "__main__":
+    main()

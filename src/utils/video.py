@@ -17,3 +17,18 @@ def get_next_frame(path: str):
             break
 
         yield frame, fps
+
+
+def create_video(path: str, width: int, height: int, frames: float = 30):
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+    return cv2.VideoWriter(path, fourcc, frames, (width, height))
+
+
+def create_video_as_other(input_video_path: str, output_video_path: str):
+    vid_capture = cv2.VideoCapture(input_video_path)
+    fps = vid_capture.get(cv2.CAP_PROP_FPS)
+
+    ret, frame = vid_capture.read()
+    h, w = frame.shape[:2]
+
+    return create_video(output_video_path, w, h, fps)
