@@ -4,7 +4,7 @@ import numpy as np
 from src.background_subtraction.mog import MogBackgroundSubtraction
 from src.techniques.kalman import Kalman
 from src.utils.background_subtraction import clean_image, remove_shadows, fill_contours
-from src.utils.get_center_from_foreground import get_center_from_foreground, get_bounding_box_from_foreground
+from src.utils.get_center_from_foreground import get_bounding_box_from_foreground
 from src.utils.video import get_next_frame
 
 pos_kalman = Kalman(1, 0, 0.9, 1)
