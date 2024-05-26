@@ -5,9 +5,8 @@ from src.techniques.particle_filter_v2 import ParticleFilterV2
 
 
 class ParticleFilterWrapper:
-    def __init__(self, bg_subtractor, particle_filter: ParticleFilterV2):
+    def __init__(self, particle_filter: ParticleFilterV2):
         self.pf = particle_filter
-        self.bg_subtractor = bg_subtractor
 
         self.estimated_pos = None, None
 
