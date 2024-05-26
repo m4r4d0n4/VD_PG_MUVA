@@ -1,6 +1,7 @@
 import torch
 import cv2
 
+
 class YOLOPersonDetector:
     """Clase para detectar personas utilizando YOLOv5.
 
@@ -20,14 +21,14 @@ class YOLOPersonDetector:
         self.confidence_threshold = confidence_threshold
 
     def apply(self, frame):
-        """Aplica la detección de personas en un cuadro de imagen.
+        """Aplica la detección de personas en un frame de imagen.
 
         Args:
             frame (array): Imagen (numpy array) en formato BGR.
 
         Returns:
             tuple: Una tupla que contiene:
-                - El cuadro de imagen con las detecciones dibujadas.
+                - El frame de imagen con las detecciones dibujadas.
                 - La coordenada x del centro del rectángulo de detección.
                 - Las coordenadas x1, y1, x2, y2 de los vértices del rectángulo de detección.
                 - La confianza de la detección.
@@ -43,7 +44,7 @@ class YOLOPersonDetector:
             if conf < self.confidence_threshold:
                 continue
 
-            # Dibujar la caja delimitadora en el cuadro
+            # Dibujar la caja delimitadora en el frame
             cv2.rectangle(frame, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 2)
 
             # Calcular y dibujar el centro del rectángulo
@@ -54,7 +55,9 @@ class YOLOPersonDetector:
             cv2.putText(frame, f'Person {conf:.2f}', (int(x1), int(y1) - 10), 
                         cv2.FONT_HERSHEY_SIMPLEX, 0.9, (36, 255, 12), 2)
 
-        return frame , center_x, center_y , x1, y1, x2, y2, conf
+        return frame, center_x, center_y, x1, y1, x2, y2, conf
+
+
 if __name__ == "__main__":
     # Ruta al video de entrada
     video_path = "./resources/video/Walking.60457274.mp4"
@@ -81,11 +84,10 @@ if __name__ == "__main__":
         # Aplicar la detección de personas
         frame, center_x,center_y, x1, y1, x2, y2, conf = detector.apply(frame)
 
-
-        # Escribir el cuadro en el video de salida
+        # Escribir el frame en el video de salida
         #out.write(frame)
 
-        # Mostrar el cuadro resultante (opcional)
+        # Mostrar el frame resultante (opcional)
         cv2.imshow('Person Detection', frame)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
