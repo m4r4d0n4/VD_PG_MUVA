@@ -8,7 +8,7 @@ class Kalman:
             [0, 1],
         ])
         self.b = np.array([
-            [(dt ** 2) / 2],
+            [dt],
             [dt]
         ])
         self.h = np.array([
@@ -16,8 +16,8 @@ class Kalman:
         ])
         self.u = u
         self.q = np.array([
-            [(dt ** 4) / 4, (dt ** 3) / 2],
-            [(dt ** 3) / 2, dt ** 2],
+            [dt, dt],
+            [dt, dt],
         ]) * std_acc ** 2
         self.r = std_meas ** 2
         self.p = np.eye(self.a.shape[1])
