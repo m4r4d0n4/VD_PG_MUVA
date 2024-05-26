@@ -19,5 +19,5 @@ class StaticBackgroundSubtraction:
 
     @staticmethod
     def _normalize_frame(frame: np.ndarray) -> np.ndarray:
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        return frame.astype(np.float32) / 255
+        new_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        return new_frame.astype(np.float32) / 255
