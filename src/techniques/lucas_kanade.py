@@ -47,8 +47,6 @@ class LucasKanadeTracker:
             good_new = p1[st == 1]
             good_old = self.p0[st == 1]
 
-
-            
         # Dibujar las trazas
         for i, (new, old) in enumerate(zip(good_new, good_old)):
             a, b = new.ravel()
@@ -70,7 +68,6 @@ class LucasKanadeTracker:
         return img
 
     def apply_bbox(self,frame):
-
         # Asegurarse de que el tracker está inicializado
         if self.old_gray is None or self.p0 is None:
             raise ValueError("El tracker no está inicializado. Llama a 'initialize' con el primer cuadro.")
@@ -103,4 +100,3 @@ class LucasKanadeTracker:
         img = cv2.add(frame, self.mask)
 
         return img
-

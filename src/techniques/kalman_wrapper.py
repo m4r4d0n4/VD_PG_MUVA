@@ -27,8 +27,6 @@ class KalmanWrapper:
         self.pos_kalman.update((x, y))
         self.size_kalman.update((w, h))
 
-        return pred_x, pred_y, pred_x + pred_w, pred_y + pred_h
-
         """
         # Draw the bounding boxes
         cv2.rectangle(frame, (pred_x, pred_y), (pred_x + pred_w, pred_y + pred_h), (255, 255, 0), 3)
@@ -37,3 +35,5 @@ class KalmanWrapper:
         cv2.imshow("Kalman", frame)
         cv2.waitKey(0)
         """
+
+        return pred_x, pred_y, pred_x + pred_w, pred_y + pred_h

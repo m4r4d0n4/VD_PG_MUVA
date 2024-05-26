@@ -1,6 +1,11 @@
 
 
 def evaluate_background_subtraction(gt, other):
+    """
+    Helper function to evaluate the background subtraction methods.
+    Compares the gt image with another one.
+    :returns: A dictionary with precision, recall and f1_score.
+    """
     good_fg_detected = 0
 
     total_fg_detected = 0
@@ -38,4 +43,3 @@ def evaluate_background_subtraction(gt, other):
         "precision": precision,
         "f1_score": f1_score,
     }
-

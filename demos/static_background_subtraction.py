@@ -3,6 +3,7 @@ import cv2
 from src.background_subtraction.static_background_subtraction import StaticBackgroundSubtraction
 from src.utils.video import get_next_frame
 
+
 VIDEO_PATH = "../resources/video/Walking.54138969.mp4"
 USE_FIRST_FRAME = False
 STITCHED_BACKGROUND_PATH = "../output/background_stitched.jpg"

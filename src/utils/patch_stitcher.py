@@ -3,13 +3,15 @@ import numpy as np
 
 from src.utils.video import get_next_frame
 
-
+# Choose paths to the path and the output video
 VIDEO_PATH = "../../resources/video/Walking.54138969.mp4"
 OUTPUT_PATH = "../../output/background_stitched_recording.jpg"
 
+# Choose the number of division on the image
 COLUMNS_DIVISORS = 3
 ROWS_DIVISORS = 3
 
+# Hardcoded keys
 UP_KEY = 119
 DOWN_KEY = 115
 RIGHT_KEY = 100

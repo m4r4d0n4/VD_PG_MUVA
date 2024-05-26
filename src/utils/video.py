@@ -20,11 +20,18 @@ def get_next_frame(path: str):
 
 
 def create_video(path: str, width: int, height: int, frames: float = 30):
+    """
+    Helper function that creates and returns an OpenCV video object that can be written to.
+    """
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
     return cv2.VideoWriter(path, fourcc, frames, (width, height))
 
 
 def create_video_as_other(input_video_path: str, output_video_path: str):
+    """
+    Helper function that creates and returns an OpenCV video object that can be written to.
+    The size of the video element is the same of the provided video.
+    """
     vid_capture = cv2.VideoCapture(input_video_path)
     fps = vid_capture.get(cv2.CAP_PROP_FPS)
 
