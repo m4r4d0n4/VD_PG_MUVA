@@ -11,30 +11,28 @@ MOSTRAR_IMAGENES = True
 
 
 def main():
-    # Crear una instancia del detector de personas
+    # YOLO for detecting people
     detector = YOLOPersonDetector()
-    # Inicializar el tiempo de inicio
+    
     start_time = time.time()
     tiempos = []
 
     for frame, fps in get_next_frame(VIDEO_PATH):
-        # Aplicar la detección de personas
+        # Detecting people in the image
         frame, center_x,center_y, x1, y1, x2, y2, conf = detector.apply(frame)
-        # Convertir el tiempo total de ejecución a milisegundos
+        # Convert to ms
         total_time = (time.time() - start_time) * 1000
 
         tiempos.append(total_time)
         start_time = time.time()
         if MOSTRAR_IMAGENES:
-            # Mostrar el frame resultante (opcional)
             cv2.imshow('Person Detection', frame)
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
     
-    # Calcular la media
+    
     media = statistics.mean(tiempos)
 
-    # Calcular la desviación estándar
     desviacion_estandar = statistics.stdev(tiempos)
     print("Media:", media)
     print("Desviación estándar:", desviacion_estandar)

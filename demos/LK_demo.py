@@ -13,13 +13,13 @@ MOSTRAR_IMAGENES = True
 
 
 def main():
-    # Initialize ParticleFilter
+    # LK tracker
     lk = LucasKanadeTracker()
     
     # Initialize background subtractor
     bg_subtraction = MogBackgroundSubtraction()
     init = False
-    # Inicializar el tiempo de inicio
+    # Start timer
     start_time = time.time()
     tiempos = []
     for frame, fps in get_next_frame(VIDEO_PATH):
@@ -34,11 +34,11 @@ def main():
                 cv2.waitKey(0)
             init = True
         if init:
-            #Para ver la caja
+            # Uncomment to see the boxes
             f = lk.apply_bbox(frame)
-            #Para el OF
+            # Uncomment to see the OF
             #f = lk.apply(frame)
-            # Convertir el tiempo total de ejecución a milisegundos
+            # Convert to ms
             total_time = (time.time() - start_time) * 1000
 
             tiempos.append(total_time)
@@ -47,10 +47,8 @@ def main():
             if MOSTRAR_IMAGENES:
                 cv2.imshow("Lucas-Kanade", f)
                 cv2.waitKey(int(fps))
-    # Calcular la media
+    
     media = statistics.mean(tiempos)
-
-    # Calcular la desviación estándar
     desviacion_estandar = statistics.stdev(tiempos)
     print("Media:", media)
     print("Desviación estándar:", desviacion_estandar)
