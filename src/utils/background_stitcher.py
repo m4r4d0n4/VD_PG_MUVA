@@ -5,13 +5,10 @@ from src.utils.video import get_next_frame
 
 
 VIDEO_PATH = "../../resources/video/Walking.54138969.mp4"
-OUTPUT_PATH = "../../output/background_stitched.jpg"
+OUTPUT_PATH = "../../output/background_stitched_recording.jpg"
 
 COLUMNS_DIVISORS = 3
 ROWS_DIVISORS = 3
-
-current_row = 0
-current_col = 0
 
 UP_KEY = 119
 DOWN_KEY = 115
@@ -21,79 +18,91 @@ OK_KEY = 32
 SAVE_KEY = 101
 ESCAPE_KEY = 27
 
-background_frame: np.ndarray = None
+selected_patches = []
 
-def draw_rects(frame):
+
+def calculate_region_from_pos(col: int, row: int, col_size: int, row_size: int, w: int, h: int) -> (int, int, int, int):
+    min_x = max(0, col_size * col)
+    min_y = max(0, row_size * row)
+
+    max_x = min(min_x + col_size, w)
+    max_y = min(min_y + row_size, h)
+
+    return min_x, min_y, max_x, max_y
+
+
+def draw_rects(frame: np.ndarray, current_col: int, current_row: int):
     h, w = frame.shape[:2]
 
     col_size = h // COLUMNS_DIVISORS
     row_size = w // ROWS_DIVISORS
 
+    # Draw already selected region
+    for col, row in selected_patches:
+        min_x, min_y, max_x, max_y = calculate_region_from_pos(col, row, col_size, row_size, w, h)
+        cv2.rectangle(frame, (min_x + 2, min_y + 2), (max_x - 2, max_y - 2), (255, 0, 255), 2)
+
+    # Draw all regions
     for col in range(COLUMNS_DIVISORS):
         for row in range(ROWS_DIVISORS):
-            min_x = max(0, col_size * col)
-            min_y = max(0, row_size * row)
+            min_x, min_y, max_x, max_y = calculate_region_from_pos(col, row, col_size, row_size, w, h)
+            cv2.rectangle(frame, (min_x, min_y), (max_x, max_y), (255, 0, 0), 1)
 
-            max_x = min(min_x + col_size, w)
-            max_y = min(min_y + row_size, h)
-
-            color = (255, 0, 0)
-            if col == current_col and row == current_row:
-                color = (0, 255, 0)
-
-            cv2.rectangle(frame, (min_x, min_y), (max_x, max_y), color, 2)
-
-    min_x = max(0, col_size * current_col)
-    min_y = max(0, row_size * current_row)
-
-    max_x = min(min_x + col_size, w)
-    max_y = min(min_y + row_size, h)
-
+    # Draw current region
+    min_x, min_y, max_x, max_y = calculate_region_from_pos(current_col, current_row, col_size, row_size, w, h)
     cv2.rectangle(frame, (min_x, min_y), (max_x, max_y), (0, 255, 0), 3)
 
 
-for frame, fps in get_next_frame(VIDEO_PATH):
-    keep_frame = True
+def main():
+    current_row = 0
+    current_col = 0
+    background_frame: np.ndarray | None = None
 
-    while keep_frame:
-        new_frame = frame.copy()
-        draw_rects(new_frame)
+    for frame, fps in get_next_frame(VIDEO_PATH):
+        keep_frame = True
 
-        cv2.imshow("Image", new_frame)
-        key = cv2.waitKey(0)
+        while keep_frame:
+            new_frame = frame.copy()
+            draw_rects(new_frame, current_col, current_row)
 
-        if key == ESCAPE_KEY:
-            cv2.imwrite(OUTPUT_PATH, background_frame)
-            exit(0)  # FORCE EXIT
+            cv2.imshow("Image", new_frame)
+            key = cv2.waitKey(0)
 
-        if key == UP_KEY:
-            current_row = max(0, current_row - 1)
+            if key == ESCAPE_KEY:
+                cv2.imwrite(OUTPUT_PATH, background_frame)
+                return
 
-        if key == DOWN_KEY:
-            current_row = min(ROWS_DIVISORS - 1, current_row + 1)
+            if key == UP_KEY:
+                current_row = max(0, current_row - 1)
 
-        if key == LEFT_KEY:
-            current_col = max(0, current_col - 1)
+            if key == DOWN_KEY:
+                current_row = min(ROWS_DIVISORS - 1, current_row + 1)
 
-        if key == RIGHT_KEY:
-            current_col = min(COLUMNS_DIVISORS - 1, current_col + 1)
+            if key == LEFT_KEY:
+                current_col = max(0, current_col - 1)
 
-        if key == OK_KEY:
-            keep_frame = False
+            if key == RIGHT_KEY:
+                current_col = min(COLUMNS_DIVISORS - 1, current_col + 1)
 
-        if key == SAVE_KEY:
-            if background_frame is None:
-                background_frame = np.zeros_like(frame)
+            if key == OK_KEY:
+                keep_frame = False
 
-            h, w = frame.shape[:2]
+            if key == SAVE_KEY:
+                if (current_col, current_row) not in selected_patches:
+                    selected_patches.append((current_col, current_row))
 
-            col_size = h // COLUMNS_DIVISORS
-            row_size = w // ROWS_DIVISORS
+                if background_frame is None:
+                    background_frame = np.zeros_like(frame)
 
-            min_x = max(0, col_size * current_col)
-            min_y = max(0, row_size * current_row)
+                h, w = frame.shape[:2]
 
-            max_x = min(min_x + col_size, w)
-            max_y = min(min_y + row_size, h)
+                col_size = h // COLUMNS_DIVISORS
+                row_size = w // ROWS_DIVISORS
 
-            background_frame[min_y: max_y, min_x: max_x] = frame[min_y: max_y, min_x: max_x]
+                min_x, min_y, max_x, max_y = calculate_region_from_pos(current_col, current_row, col_size, row_size, w,
+                                                                       h)
+                background_frame[min_y: max_y, min_x: max_x] = frame[min_y: max_y, min_x: max_x]
+
+
+if __name__ == "__main__":
+    main()
